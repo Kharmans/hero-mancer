@@ -630,23 +630,12 @@ export class CharacterRandomizer {
    * @private
    */
   static #randomizeAppearanceTraits(form) {
+    const split = (key) => (game.settings.get(MODULE.ID, key) || '').split(',').map((v) => v.trim()).filter(Boolean);
     const traits = {
-      eyes: game.settings
-        .get(MODULE.ID, 'eyeColors')
-        .split(',')
-        .map((e) => e.trim()),
-      hair: game.settings
-        .get(MODULE.ID, 'hairColors')
-        .split(',')
-        .map((h) => h.trim()),
-      skin: game.settings
-        .get(MODULE.ID, 'skinTones')
-        .split(',')
-        .map((s) => s.trim()),
-      gender: game.settings
-        .get(MODULE.ID, 'genders')
-        .split(',')
-        .map((g) => g.trim())
+      eyes: split('eyeColors'),
+      hair: split('hairColors'),
+      skin: split('skinTones'),
+      gender: split('genders')
     };
     for (const [trait, values] of Object.entries(traits)) {
       if (!values.length) continue;

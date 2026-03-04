@@ -1,5 +1,5 @@
 import { MODULE } from './constants.mjs';
-import { CharacterArtPicker, CustomCompendiums, Customization, DiceRolling, HM, MandatoryFields, StatRoller, Troubleshooter } from './utils/index.js';
+import { CharacterArtPicker, CustomCompendiums, Customization, DiceRolling, HM, log, MandatoryFields, StatRoller, Troubleshooter } from './utils/index.js';
 
 const { ArrayField, BooleanField, NumberField, ObjectField, StringField } = foundry.data.fields;
 
@@ -427,6 +427,7 @@ export async function rerenderHM() {
   await app.close();
 }
 
+// TODO: Remove migration in 2.2.0 — all active worlds should be migrated by then.
 const SETTING_KEY_MIGRATIONS = { 'eye-colors': 'eyeColors', 'hair-colors': 'hairColors', 'skin-tones': 'skinTones' };
 
 /**
@@ -438,11 +439,15 @@ const SETTING_KEY_MIGRATIONS = { 'eye-colors': 'eyeColors', 'hair-colors': 'hair
 export async function migrateSettingKeys() {
   const storage = game.settings.storage.get('world');
   for (const [oldKey, newKey] of Object.entries(SETTING_KEY_MIGRATIONS)) {
-    const fullOldKey = `${MODULE.ID}.${oldKey}`;
-    const oldEntry = storage.find((s) => s.key === fullOldKey);
-    if (!oldEntry) continue;
-    const value = JSON.parse(oldEntry.value);
-    await game.settings.set(MODULE.ID, newKey, value);
-    await oldEntry.delete();
+    try {
+      const fullOldKey = `${MODULE.ID}.${oldKey}`;
+      const oldEntry = storage.find((s) => s.key === fullOldKey);
+      if (!oldEntry) continue;
+      const value = JSON.parse(oldEntry.value);
+      await game.settings.set(MODULE.ID, newKey, value);
+      await oldEntry.delete();
+    } catch (error) {
+      log(1, `Failed to migrate setting '${oldKey}' → '${newKey}':`, error);
+    }
   }
 }

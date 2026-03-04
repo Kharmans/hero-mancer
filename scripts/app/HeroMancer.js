@@ -133,16 +133,8 @@ export class HeroMancer extends HandlebarsApplicationMixin(ApplicationV2) {
         break;
       }
       case 'biography':
-        context.alignments =
-          game.settings
-            .get(MODULE.ID, 'alignments')
-            .split(',')
-            .map((d) => d.trim()) || [];
-        context.deities =
-          game.settings
-            .get(MODULE.ID, 'deities')
-            .split(',')
-            .map((d) => d.trim()) || [];
+        context.alignments = (game.settings.get(MODULE.ID, 'alignments') || '').split(',').map((d) => d.trim()).filter(Boolean);
+        context.deities = (game.settings.get(MODULE.ID, 'deities') || '').split(',').map((d) => d.trim()).filter(Boolean);
         context.enableAlignmentFaithInputs = game.settings.get(MODULE.ID, 'enableAlignmentFaithInputs');
         break;
       case 'footer':
